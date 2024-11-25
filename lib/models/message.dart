@@ -1,5 +1,5 @@
 class Message {
-  final String id;
+  final int id;
   final String content;
 
   Message({required this.id, required this.content});

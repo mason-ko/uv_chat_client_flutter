@@ -4,7 +4,7 @@ import '../services/chat_service.dart';
 import 'message_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
-  final String userId;
+  final int userId;
 
   const ChatListScreen({super.key, required this.userId});
 

@@ -7,7 +7,7 @@ class ChatService {
   static const String apiBaseUrl = 'http://localhost:8080/api';
 
   // 채널 목록을 가져오는 함수
-  static Future<List<Channel>> getChannelList(String userId) async {
+  static Future<List<Channel>> getChannelList(int userId) async {
     final response = await http.get(Uri.parse('$apiBaseUrl/channels?userId=$userId'));
 
     print('CHANNEL LIST$response');
@@ -28,7 +28,7 @@ class ChatService {
   }
 
 // 채널에 새로운 메시지를 보내는 함수
-  static Future<void> createChannel() async {
+  static Future<void> createChannel(int userId, int targetId) async {
     final response = await http.post(
       Uri.parse('$apiBaseUrl/channels'),
       headers: {"Content-Type": "application/json"},
@@ -57,7 +57,7 @@ class ChatService {
   }
 
   // 특정 채널의 메시지 목록을 가져오는 함수
-  static Future<List<Message>> getMessages(String channelId) async {
+  static Future<List<Message>> getMessages(int channelId) async {
     final response = await http.get(Uri.parse('$apiBaseUrl/messages?channelId=$channelId'));
 
     if (response.statusCode == 200) {
@@ -69,7 +69,7 @@ class ChatService {
   }
 
   // 채널에 새로운 메시지를 보내는 함수
-  static Future<void> sendMessage(String channelId, String content) async {
+  static Future<void> sendMessage(int channelId, String content) async {
     final response = await http.post(
       Uri.parse('$apiBaseUrl/messages'),
       headers: {"Content-Type": "application/json"},

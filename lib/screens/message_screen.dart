@@ -3,7 +3,7 @@ import '../services/chat_service.dart';
 import '../models/message.dart';
 
 class MessageScreen extends StatefulWidget {
-  final String channelId;
+  final int channelId;
 
   const MessageScreen({super.key, required this.channelId});
 

@@ -14,10 +14,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _countryController = TextEditingController();
 
   Future<void> _handleLogin() async {
-    final userId = _userIdController.text;
+    final userId = int.parse(_userIdController.text);
     final country = _countryController.text;
 
-    if (userId.isEmpty || country.isEmpty) {
+    if (userId == 0 || country.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter both user ID and country')),
       );

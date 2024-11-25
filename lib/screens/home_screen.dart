@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:uv_chat_client_flutter/screens/user_list_screen.dart';
 import '../models/channel.dart';
 import '../services/chat_service.dart';
 import 'message_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userId;
+  final int userId;
   final String country;
 
   const HomeScreen({Key? key, required this.userId, required this.country}) : super(key: key);
@@ -37,12 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
         isLoading = false; // 에러 발생 시 로딩 완료 상태로 변경
       });
     }
-  }
-
-  // 새로운 채널을 생성하는 함수
-  Future<void> _createNewChannel() async {
-    await ChatService.createChannel(); // 예시로 생성 API 호출
-    _loadChatList();
   }
 
   @override
@@ -84,7 +79,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _createNewChannel, // + 버튼 클릭 시 새로운 채널 생성
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => UserListScreen(userId: widget.userId),
+            ),
+          );
+        }, // + 버튼 클릭 시 새로운 채널 생성
         child: const Icon(Icons.add),
         tooltip: 'Create New Channel',
       ),
