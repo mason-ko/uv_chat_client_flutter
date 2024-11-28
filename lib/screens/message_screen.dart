@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 날짜 포맷을 위한 패키지
 import '../services/chat_service.dart';
 import '../models/message.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class MessageScreen extends StatefulWidget {
   final int channelId;
@@ -14,6 +15,7 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
+  late IO.Socket socket;
   final TextEditingController _messageController = TextEditingController();
   late Future<List<Message>> _messages;
 
@@ -21,6 +23,30 @@ class _MessageScreenState extends State<MessageScreen> {
   void initState() {
     super.initState();
     _messages = ChatService.getMessages(widget.channelId);
+    connectToServer();
+  }
+
+  void connectToServer() {
+    // 서버와 연결 설정
+    socket = IO.io('http://localhost:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket.connect(); // 서버에 연결
+
+    socket.on('connect', (_) {
+      print('Connected to server');
+    });
+
+    socket.on('disconnect', (_) {
+      print('Disconnected from server');
+    });
+
+    // 메시지를 수신할 때 이벤트 처리
+    socket.on('receive_message', (data) {
+      print("RECEIVCE~~");
+    });
   }
 
   String _formatTimestamp(String timestamp) {
