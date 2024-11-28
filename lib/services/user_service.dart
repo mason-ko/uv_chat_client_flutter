@@ -12,9 +12,12 @@ class UserService {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      print("user list $data");
-      return data.map((json) => User.fromJson(json)).toList();
+
+      final ret = data.map((json) => User.fromJson(json)).toList();
+      print("user list $ret");
+      return ret;
     } else {
+      print("user list errrr");
       throw Exception('Failed to load user list');
     }
   }

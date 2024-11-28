@@ -6,9 +6,10 @@ import 'message_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
+  final String userName;
   final String country;
 
-  const HomeScreen({Key? key, required this.userId, required this.country}) : super(key: key);
+  const HomeScreen({Key? key, required this.userId, required this.userName, required this.country}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
