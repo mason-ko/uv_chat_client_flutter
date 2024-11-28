@@ -32,7 +32,7 @@ class ChatListScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MessageScreen(channelId: channel.id),
+                      builder: (context) => MessageScreen(channelId: channel.id, userId: userId),
                     ),
                   );
                 },

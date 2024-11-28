@@ -33,13 +33,14 @@ class UserListScreen extends StatelessWidget {
                 onTap: () async {
                   try {
                     // 채널 생성 API 호출
-                    await ChatService.createChannel(userId, user.id);
+                    final channelID = await ChatService.createChannel(userId, user.id);
 
+                    print("CHID  $channelID");
                     // MessageScreen으로 이동 (MessageService 호출 포함)
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MessageScreen(channelId: user.id),
+                        builder: (context) => MessageScreen(channelId: channelID, userId: userId),
                       ),
                     );
                   } catch (e) {

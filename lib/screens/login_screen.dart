@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.number,
             ),
             TextField(
-              controller: _userIdController,
+              controller: _userNameController,
               decoration: const InputDecoration(labelText: 'User Name'),
               keyboardType: TextInputType.name,
             ),

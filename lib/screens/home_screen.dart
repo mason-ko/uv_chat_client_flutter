@@ -63,13 +63,13 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 final channel = chatList[index];
                 return ListTile(
-                  title: Text(channel.name),
+                  title: Text(channel.id.toString()),
                   subtitle: Text(channel.lastContent ?? 'No messages yet'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MessageScreen(channelId: channel.id),
+                        builder: (context) => MessageScreen(channelId: channel.id, userId: widget.userId),
                       ),
                     );
                   },

@@ -28,17 +28,28 @@ class ChatService {
   }
 
 // 채널에 새로운 메시지를 보내는 함수
-  static Future<void> createChannel(int userId, int targetId) async {
+  static Future<int> createChannel(int userId, int targetId) async {
     final response = await http.post(
       Uri.parse('$apiBaseUrl/channels'),
       headers: {"Content-Type": "application/json"},
-      // body: json.encode({"channelId": channelId, "content": content}),
+      body: json.encode({"userId": userId, "targetUserId": targetId}),
     );
 
     if (response.statusCode != 201) {
-      throw Exception('Failed to send message');
+      throw Exception('Failed to create channel');
     }
+
+    // JSON 응답에서 channelId를 추출하여 반환
+    final responseData = json.decode(response.body); // JSON 파싱
+    final channelId = responseData['channelId']; // channelId 추출
+
+    if (channelId == null) {
+      throw Exception('channelId is missing in the response');
+    }
+
+    return int.parse(channelId);
   }
+
 
   // 새로운 채널을 생성하는 함수
   static Future<String> startNewChat(String userId) async {
@@ -69,14 +80,14 @@ class ChatService {
   }
 
   // 채널에 새로운 메시지를 보내는 함수
-  static Future<void> sendMessage(int channelId, String content) async {
+  static Future<void> sendMessage(int channelId, int userId, String content) async {
     final response = await http.post(
       Uri.parse('$apiBaseUrl/messages'),
       headers: {"Content-Type": "application/json"},
-      body: json.encode({"channelId": channelId, "content": content}),
+      body: json.encode({"channelId": channelId, "content": content, "userId": userId}),
     );
 
-    if (response.statusCode != 201) {
+    if (response.statusCode != 200) {
       throw Exception('Failed to send message');
     }
   }
