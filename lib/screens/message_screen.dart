@@ -17,36 +17,69 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   late IO.Socket socket;
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // ScrollController 추가
   late Future<List<Message>> _messages;
+  List<Message> _messageList = [];
 
   @override
   void initState() {
     super.initState();
     _messages = ChatService.getMessages(widget.channelId);
+    _messages.then((initialMessages) {
+      setState(() {
+        _messageList = initialMessages;
+      });
+    });
     connectToServer();
   }
 
+  @override
+  void dispose() {
+    socket.dispose(); // 소켓 연결 해제
+    _messageController.dispose(); // 컨트롤러 해제
+    _scrollController.dispose(); // 스크롤 컨트롤러 해제
+    super.dispose();
+  }
+
   void connectToServer() {
-    // 서버와 연결 설정
     socket = IO.io('http://localhost:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
 
-    socket.connect(); // 서버에 연결
+    socket.connect();
 
     socket.on('connect', (_) {
       print('Connected to server');
+      socket.emit('join_channel', {'channelId': widget.channelId});
     });
 
     socket.on('disconnect', (_) {
       print('Disconnected from server');
     });
 
-    // 메시지를 수신할 때 이벤트 처리
-    socket.on('receive_message', (data) {
-      print("RECEIVCE~~");
+    socket.on('create_message', (data) {
+      final newMessage = Message(
+        id: data['ID'],
+        userId: data['UserID'],
+        content: data['Content'],
+        translatedContent: data['TranslatedContent'] ?? "",
+        createdAt: data['CreatedAt'],
+      );
+
+      setState(() {
+        _messageList.add(newMessage);
+      });
+
+      // 메시지 추가 후 스크롤을 최하단으로 이동
+      _scrollToBottom();
     });
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    }
   }
 
   String _formatTimestamp(String timestamp) {
@@ -59,80 +92,70 @@ class _MessageScreenState extends State<MessageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Messages"),
-        backgroundColor: Colors.teal, // 헤더 색상 변경
+        backgroundColor: Colors.teal,
       ),
       body: Column(
         children: [
           Expanded(
-            child: FutureBuilder<List<Message>>(
-              future: _messages,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final messages = snapshot.data!;
-                return ListView.builder(
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isUserMessage = message.userId == widget.userId;
+            child: ListView.builder(
+              controller: _scrollController, // ScrollController 연결
+              itemCount: _messageList.length,
+              itemBuilder: (context, index) {
+                final message = _messageList[index];
+                final isUserMessage = message.userId == widget.userId;
 
-                    return Align(
-                      alignment:
-                      isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
+                return Align(
+                  alignment: isUserMessage
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 10.0),
+                    child: Card(
+                      color: isUserMessage ? Colors.teal[100] : Colors.grey[200],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4.0, horizontal: 10.0),
-                        child: Card(
-                          color: isUserMessage ? Colors.teal[100] : Colors.grey[200],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // 메시지 내용 표시
-                                Text(
-                                  isUserMessage
-                                      ? "${message.userId}: ${message.content}"
-                                      : "${message.userId}: ${message.translatedContent}",
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                // 번역된 메시지 표시
-                                Text(
-                                  isUserMessage
-                                      ? "번역된 메시지: ${message.translatedContent}"
-                                      : "번역된 메시지: ${message.content}",
-                                  style: const TextStyle(
-                                    color: Colors.black54,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                // 메시지 생성 시간 표시
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Text(
-                                    _formatTimestamp(message.createdAt),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isUserMessage
+                                  ? "${message.userId}: ${message.content}"
+                                  : "${message.userId}: ${message.translatedContent}",
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 5),
+                            Text(
+                              isUserMessage
+                                  ? "번역된 메시지: ${message.translatedContent}"
+                                  : "번역된 메시지: ${message.content}",
+                              style: const TextStyle(
+                                color: Colors.black54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                _formatTimestamp(message.createdAt),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 );
               },
             ),
@@ -167,10 +190,8 @@ class _MessageScreenState extends State<MessageScreen> {
                       widget.userId,
                       messageContent,
                     );
-                    setState(() {
-                      _messages = ChatService.getMessages(widget.channelId);
-                    });
                     _messageController.clear();
+                    _scrollToBottom(); // 메시지 전송 후 스크롤 이동
                   },
                 ),
               ],
