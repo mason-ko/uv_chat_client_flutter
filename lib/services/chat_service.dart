@@ -72,7 +72,8 @@ class ChatService {
     final response = await http.get(Uri.parse('$apiBaseUrl/messages?channelId=$channelId'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final List<dynamic> data = json.decode(decodedBody);
       return data.map((json) => Message.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load messages');
