@@ -3,23 +3,21 @@ import '../screens/home_screen.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   String _selectedCountry = 'korean'; // 기본 값 설정
 
   Future<void> _handleLogin() async {
-    final userId = int.tryParse(_userIdController.text) ?? 0;
     final country = _selectedCountry;
     final userName = _userNameController.text;
 
-    if (userId == 0 || country.isEmpty) {
+    if (userName.isEmpty || country.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid user ID and select a country')),
       );
@@ -28,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       // AuthService의 createUser 함수를 호출하여 사용자 생성
-      await AuthService.createUser(userId, userName, country);
+      var userId = await AuthService.createUser(userName, country);
 
       // HomeScreen으로 이동
       Navigator.push(
@@ -54,11 +52,6 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _userIdController,
-              decoration: const InputDecoration(labelText: 'User ID'),
-              keyboardType: TextInputType.number,
-            ),
             TextField(
               controller: _userNameController,
               decoration: const InputDecoration(labelText: 'User Name'),
