@@ -60,11 +60,11 @@ class _MessageScreenState extends State<MessageScreen> {
 
     socket.on('create_message', (data) {
       final newMessage = Message(
-        id: data['ID'],
-        userId: data['UserID'],
-        content: data['Content'],
-        translatedContent: data['TranslatedContent'] ?? "",
-        createdAt: data['CreatedAt'],
+        id: data['id'],
+        userId: data['userId'],
+        content: data['content'],
+        translatedContent: data['translatedContent'],
+        createdAt: formatDate(List<int>.from(data['createdAt'] ?? [])),
       );
 
       setState(() {
